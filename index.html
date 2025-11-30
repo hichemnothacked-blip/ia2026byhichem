@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal AI Assistant</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        header {
+            background-color: #4a5568;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        #chat-box {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            line-height: 1.5;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #3b82f6;
+            color: white;
+            margin-left: auto;
+        }
+        .ai-message {
+            background-color: #e2e8f0;
+            color: #1a202c;
+            margin-right: auto;
+        }
+        .ai-message.loading::after {
+            content: '...';
+            display: inline-block;
+            animation: ellipsis 1.2s infinite;
+        }
+        @keyframes ellipsis {
+            50% { content: ' ..'; }
+            100% { content: '...'; }
+        }
+        #input-area {
+            display: flex;
+            padding: 1rem;
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+        #send-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        #send-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <header>Legal AI Assistant</header>
+        <div id="chat-box"></div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Ask a legal question...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        async function askAI() {
+            const question = userInput.value.trim();
+            if (!question) return;
+
+            // Display user's question
+            chatBox.innerHTML += `<div class="message user-message">${question}</div>`;
+            userInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Display loading indicator
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message ai-message loading';
+            loadingMessage.textContent = 'Thinking';
+            chatBox.appendChild(loadingMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
+
+            const data = await response.json();
+            loadingMessage.innerHTML = data.answer; // Use innerHTML to render the parsed markdown
+            loadingMessage.classList.remove('loading');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        sendButton.addEventListener('click', askAI);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                askAI();
+            }
+        });
+    </script>
+</body>
+</html>
