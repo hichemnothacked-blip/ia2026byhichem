@@ -123,16 +123,25 @@
             chatBox.appendChild(loadingMessage);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            const response = await fetch('/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: question })
-            });
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
 
-            const data = await response.json();
-            loadingMessage.innerHTML = data.answer; // Use innerHTML to render the parsed markdown
-            loadingMessage.classList.remove('loading');
-            chatBox.scrollTop = chatBox.scrollHeight;
+                const data = await response.json();
+                if (response.ok) {
+                    loadingMessage.innerHTML = data.answer; // Use innerHTML to render the parsed markdown
+                } else {
+                    loadingMessage.innerHTML = `Sorry, an error occurred: ${data.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                loadingMessage.innerHTML = 'Sorry, I was unable to connect to the server.';
+            } finally {
+                loadingMessage.classList.remove('loading');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
 
         sendButton.addEventListener('click', askAI);
