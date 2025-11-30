@@ -53,7 +53,7 @@ app.post('/ask', async (req, res) => {
       return res.status(400).json({ error: 'A question is required.' });
     }
     
-    const model = 'google/gemini-2.0-flash-exp:free'; // Using Gemini Flash via OpenRouter
+    const model = 'qwen/qwen3-235b-a22b:free'; // Using Gemini Flash via OpenRouter
     const messages = [
       { role: 'system', content: 'You are a helpful legal assistant. Provide clear, concise, and accurate information. Your answers should be in the same language as the user\'s question (English, French, or Arabic).' },
       { role: 'user', content: question },
@@ -100,3 +100,4 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
   console.log('Your Legal AI Assistant is ready!');
 });
+
